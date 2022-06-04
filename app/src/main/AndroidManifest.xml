@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.defconapplications.czat">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:name="com.defconapplications.czat.app.ChatApplication"
@@ -17,13 +16,18 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Czat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".login.LoginActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Czat">
         </activity>
     </application>
 

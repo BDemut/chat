@@ -1,17 +1,16 @@
 package com.defconapplications.czat
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.defconapplications.czat.login.LoginActivity
 import com.defconapplications.czat.ui.theme.MainTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -19,58 +18,55 @@ class MainActivity : ComponentActivity() {
 
     val viewModel: MainViewModel by viewModel()
 
+    val loginLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            viewModel.username = result.data?.getStringExtra(USER_NAME_KEY)
+            getPreferences(Context.MODE_PRIVATE)
+                .edit()
+                .putString(USER_NAME_KEY, viewModel.username)
+                .commit()
+        } else {
+            finishAndRemoveTask()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        val userName = getPreferences(Context.MODE_PRIVATE)
+            .getString(USER_NAME_KEY, null)
+
+        if (userName == null) {
+            loginLauncher.launch(
+                Intent(this, LoginActivity::class.java)
+            )
+        } else {
+            viewModel.username = userName
+        }
 
         setContent {
             MainTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
                     Scaffold(
-                        topBar = { Appbar(viewModel.dupa) },
-                        content = { Login() })
+                        topBar = { Appbar() },
+                        content = {  }
+                    )
                 }
             }
         }
     }
-}
 
-@Composable
-fun Login() {
-    var text by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
-            label = { Text("Your name") }
+    @Composable
+    fun Appbar() {
+        TopAppBar (
+            title = { Text(("Welcome to the chat, " + (viewModel.username ?: ""))) }
         )
-        Button(onClick = {}) {
-            Text("Submit")
-        }
     }
-}
 
-@Composable
-fun Appbar(title: String) {
-    TopAppBar (
-        title = { Text(title) }
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    MainTheme {
-        Login()
+    companion object {
+        const val USER_NAME_KEY = "user"
     }
 }
